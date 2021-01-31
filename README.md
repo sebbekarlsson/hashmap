@@ -1,5 +1,6 @@
 # hashmap
-> Generic hashmap implemented with the **sdbm** hash function.
+> Generic hashmap implemented with the **sdbm** hash function.  
+> Read more about it here: [http://www.cse.yorku.ca/~oz/hash.html](http://www.cse.yorku.ca/~oz/hash.html)
 
 ## Usage
 > Here is an example:
