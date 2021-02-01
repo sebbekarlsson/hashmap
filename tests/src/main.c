@@ -1,6 +1,7 @@
 #include "include/main.h"
 #include "../../src/include/map.h"
 #include "include/list.h"
+#include "include/test_with_structs.h"
 #include "include/utils.h"
 #include <stdio.h>
 #include <string.h>
@@ -2356,6 +2357,7 @@ int main(int argc, char* argv[])
   test_map_unset();
   test_map_unset_then_set();
   test_map_vs_loop();
+  test_with_structs();
 
   return 0;
 }

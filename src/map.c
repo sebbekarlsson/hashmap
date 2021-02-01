@@ -51,7 +51,12 @@ unsigned int long map_hashfunc(map_T* map, char* key)
 void map_resize(map_T* map, unsigned int inc)
 {
   map->len += inc;
-  map->buckets = realloc(map->buckets, (map->len * sizeof(map_bucket_T*)));
+
+  if (map->buckets) {
+    map->buckets = realloc(map->buckets, (map->len * sizeof(map_bucket_T*)));
+  } else {
+    map->buckets = calloc(map->len, sizeof(map_bucket_T*));
+  }
 }
 
 static void _map_resize(map_T* map, unsigned int inc)
