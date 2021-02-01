@@ -2,7 +2,6 @@
 #define MAP_H
 
 #define BIG_PRIME 503
-#define DEFAULT_BUCKET_MAP_SIZE BIG_PRIME
 
 typedef struct MAP_BUCKET
 {
@@ -17,7 +16,6 @@ typedef struct MAP
 {
   map_bucket_T** buckets;
   unsigned int len;
-  unsigned int mask;
   unsigned int used;
   unsigned int initial_size;
   unsigned int long collisions;

@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define MAX(a, b) a > b ? a : b
+
 map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigned int size)
 {
   map_bucket_T* bucket = calloc(1, sizeof(struct MAP_BUCKET));
@@ -26,6 +28,11 @@ map_T* init_map(unsigned int size)
 
 unsigned int long map_get_index(map_T* map, char* key)
 {
+  if (!key) {
+    printf("map_get_index error, key is null.\n");
+    exit(1);
+  }
+
   unsigned int long hash = map_hashfunc(map, key);
   unsigned int long index = hash % map->len;
 
@@ -37,6 +44,11 @@ unsigned int long map_get_index(map_T* map, char* key)
  */
 unsigned int long map_hashfunc(map_T* map, char* key)
 {
+  if (!key) {
+    printf("map_hashfunc error, key is null.\n");
+    exit(1);
+  }
+
   unsigned char* str = (unsigned char*)key;
   unsigned int long hash = 0;
   int c;
@@ -104,7 +116,7 @@ unsigned int long map_set(map_T* map, char* key, void* value)
   } else if (bucket && (strcmp(bucket->key, key) == 0)) {
     bucket->value = value;
   } else if (!bucket && !map->buckets[index]) {
-    map->buckets[index] = init_map_bucket(map, key, value, DEFAULT_BUCKET_MAP_SIZE);
+    map->buckets[index] = init_map_bucket(map, key, value, MAX(128, map->initial_size));
     map->used += 1;
   }
 
@@ -113,6 +125,10 @@ unsigned int long map_set(map_T* map, char* key, void* value)
 
 map_bucket_T* map_get(map_T* map, char* key)
 {
+  if (!key) {
+    printf("map_get error, key is null.\n");
+    exit(1);
+  }
   unsigned int long index = map_get_index(map, key);
 
   map_bucket_T* bucket = map->buckets[index];
@@ -142,7 +158,6 @@ void map_unset(map_T* map, char* key)
 
   int index = map_get_index(bucket->source_map, key);
   bucket->source_map->buckets[index] = 0;
-  map_resize(bucket->source_map, -1);
 }
 
 map_bucket_T* map_find(map_T* map, char* key)
