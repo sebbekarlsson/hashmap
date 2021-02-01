@@ -49,8 +49,7 @@ void test_with_structs()
 
   map_set(map, "john", person);
 
-  map_bucket_T* bucket = map_get(map, "john");
-  person_T* person_in_map = (person_T*)bucket->value;
+  person_T* person_in_map = (person_T*)map_get_value(map, "john");
   ASSERT(person_in_map != 0, "struct in map is not null");
   ASSERT(person_in_map->pet != 0, "struct in struct is not null");
 

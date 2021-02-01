@@ -38,6 +38,8 @@ unsigned int long map_set(map_T* map, char* key, void* value);
 
 map_bucket_T* map_get(map_T* map, char* key);
 
+void* map_get_value(map_T* map, char* key);
+
 map_bucket_T* map_find(map_T* map, char* key);
 
 void map_unset(map_T* map, char* key);

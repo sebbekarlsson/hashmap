@@ -124,6 +124,16 @@ map_bucket_T* map_get(map_T* map, char* key)
   return bucket;
 }
 
+void* map_get_value(map_T* map, char* key)
+{
+  map_bucket_T* bucket = map_get(map, key);
+
+  if (!bucket)
+    return 0;
+
+  return bucket->value;
+}
+
 void map_unset(map_T* map, char* key)
 {
   map_bucket_T* bucket = map_get(map, key);
