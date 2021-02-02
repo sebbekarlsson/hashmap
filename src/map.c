@@ -6,6 +6,17 @@
 
 #define MAX(a, b) a > b ? a : b
 
+char** maybe_realloc(char*** keys, unsigned int extra_size)
+{
+  if (!*keys) {
+    *keys = calloc(extra_size, sizeof(char*));
+  } else {
+    *keys = realloc(*keys, extra_size * sizeof(char*));
+  }
+
+  return *keys;
+}
+
 map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigned int size)
 {
   map_bucket_T* bucket = calloc(1, sizeof(struct MAP_BUCKET));
@@ -112,12 +123,23 @@ unsigned int long map_set(map_T* map, char* key, void* value)
   if (bucket && (strcmp(bucket->key, key) != 0)) {
     int i = map_set(bucket->map, key, value);
     map->collisions += 1;
+
+    map->nrkeys += 1;
+    map->keys = maybe_realloc(&map->keys, map->nrkeys);
+    map->keys[map->nrkeys - 1] = strdup(key);
+
     return i;
   } else if (bucket && (strcmp(bucket->key, key) == 0)) {
     bucket->value = value;
+    return index;
   } else if (!bucket && !map->buckets[index]) {
     map->buckets[index] = init_map_bucket(map, key, value, MAX(128, map->initial_size));
     map->used += 1;
+
+    map->nrkeys += 1;
+    map->keys = maybe_realloc(&map->keys, map->nrkeys);
+    map->keys[map->nrkeys - 1] = strdup(key);
+    return index;
   }
 
   return index;
@@ -178,4 +200,10 @@ map_bucket_T* map_find(map_T* map, char* key)
   }
 
   return 0;
+}
+
+void map_get_keys(map_T* map, char*** keys, unsigned int* size)
+{
+  *keys = map->keys;
+  *size = map->nrkeys;
 }

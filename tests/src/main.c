@@ -2347,6 +2347,131 @@ void test_map_unset_then_set()
   ASSERT(bucket != 0, "item exists again.");
 }
 
+void test_map_get_keys()
+{
+  const char* keys[] = { "paradigm",
+                         "Optional",
+                         "access",
+                         "focus group",
+                         "Polarised",
+                         "client-server",
+                         "Fully-configurable",
+                         "Fundamental",
+                         "core",
+                         "local area network",
+                         "Customer-focused",
+                         "Streamlined",
+                         "service-desk",
+                         "policy",
+                         "structure",
+                         "demand-driven",
+                         "matrix",
+                         "Progressive",
+                         "zero defect",
+                         "object-oriented",
+                         "Open-architected",
+                         "Re-contextualized",
+                         "data-warehouse",
+                         "needs-based",
+                         "superstructure",
+                         "Function-based",
+                         "Implemented",
+                         "systemic",
+                         "groupware",
+                         "Reactive",
+                         "collaboration",
+                         "productivity",
+                         "De-engineered",
+                         "asymmetric",
+                         "portal",
+                         "hybrid",
+                         "regional",
+                         "3rd generation",
+                         "Centralized",
+                         "mission-critical",
+                         "discrete",
+                         "orchestration",
+                         "full-range",
+                         "grid-enabled",
+                         "optimal",
+                         "alliance",
+                         "Future-proofed",
+                         "User-friendly",
+                         "client-driven",
+                         "Integrated",
+                         "strategy",
+                         "hierarchy",
+                         "impactful",
+                         "Multi-lateral",
+                         "scalable",
+                         "info-mediaries",
+                         "homogeneous",
+                         "foreground",
+                         "projection",
+                         "moderator",
+                         "ability",
+                         "Universal",
+                         "transitional",
+                         "installation",
+                         "bi-directional",
+                         "contextually-based",
+                         "Virtual",
+                         "5th generation",
+                         "Exclusive",
+                         "algorithm",
+                         "upward-trending",
+                         "knowledge base",
+                         "Cross-platform",
+                         "Optimized",
+                         "product",
+                         "incremental",
+                         "composite",
+                         "Monitored",
+                         "infrastructure",
+                         "Profit-focused",
+                         "executive",
+                         "website",
+                         "neural-net",
+                         "concept",
+                         "intangible" };
+
+  const char* values[] = {
+    "Ophioglossaceae",  "Cyperaceae",    "Chenopodiaceae",   "Poaceae",          "Convolvulaceae",
+    "Nymphaeaceae",     "Moraceae",      "Scrophulariaceae", "Opegraphaceae",    "Fabaceae",
+    "Rhamnaceae",       "Fabaceae",      "Rubiaceae",        "Fabaceae",         "Fabaceae",
+    "Teloschistaceae",  "Cucurbitaceae", "Apocynaceae",      "Scrophulariaceae", "Pteridaceae",
+    "Dicranaceae",      "Poaceae",       "Campanulaceae",    "Teloschistaceae",  "Ranunculaceae",
+    "Rubiaceae",        "Fabaceae",      "Cyperaceae",       "Fabaceae",         "Roccellaceae",
+    "Aristolochiaceae", "Acanthaceae",   "Cactaceae",        "Myrtaceae",        "Adoxaceae",
+    "Cyperaceae",       "Apocynaceae",   "Chenopodiaceae",   "Euphorbiaceae",    "Fabaceae",
+    "Salicaceae",       "Asteraceae",    "Apiaceae",         "Lecanoraceae",     "Rosaceae",
+    "Vitaceae",         "Thymelaeaceae", "Primulaceae",      "Liliaceae",        "Scrophulariaceae",
+    "Polygonaceae",     "Violaceae",     "Verbenaceae",      "Poaceae",          "Lamiaceae"
+  };
+
+  unsigned int nrkeys = sizeof(keys) / sizeof(keys[0]);
+  unsigned int nrvalues = sizeof(values) / sizeof(values[0]);
+
+  map_T* map = NEW_MAP();
+
+  for (unsigned int i = 0; i < nrkeys; i++) {
+    const char* k = keys[i];
+    const char* v = values[i % nrvalues];
+
+    map_set(map, (char*)k, strdup(v));
+  }
+
+  char** keyz = 0;
+  unsigned int _nrkeys;
+
+  map_get_keys(map, &keyz, &_nrkeys);
+
+  printf("%d actual: %d\n", _nrkeys, nrkeys);
+  ASSERT(_nrkeys == nrkeys, "assert number of keys are correct");
+
+  PRINT_INFO();
+}
+
 int main(int argc, char* argv[])
 {
   test_map_set();
@@ -2358,6 +2483,7 @@ int main(int argc, char* argv[])
   test_map_unset_then_set();
   test_map_vs_loop();
   test_with_structs();
+  test_map_get_keys();
 
   return 0;
 }

@@ -20,6 +20,8 @@ typedef struct MAP
   unsigned int initial_size;
   unsigned int long collisions;
   unsigned int errors;
+  char** keys;
+  unsigned int nrkeys;
 } map_T;
 
 map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigned int size);
@@ -41,6 +43,8 @@ void* map_get_value(map_T* map, char* key);
 map_bucket_T* map_find(map_T* map, char* key);
 
 void map_unset(map_T* map, char* key);
+
+void map_get_keys(map_T* map, char*** keys, unsigned int* size);
 
 #define NEW_MAP() init_map(BIG_PRIME)
 
