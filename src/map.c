@@ -17,6 +17,17 @@ char** maybe_realloc(char*** keys, unsigned int extra_size)
   return *keys;
 }
 
+map_bucket_T** maybe_realloc_buckets(map_bucket_T*** buckets, unsigned int extra_size)
+{
+  if (!*buckets) {
+    *buckets = calloc(extra_size, sizeof(char*));
+  } else {
+    *buckets = realloc(*buckets, extra_size * sizeof(char*));
+  }
+
+  return *buckets;
+}
+
 map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigned int size)
 {
   map_bucket_T* bucket = calloc(1, sizeof(struct MAP_BUCKET));
@@ -27,6 +38,15 @@ map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigne
   return bucket;
 }
 
+void map_bucket_free(map_bucket_T* bucket)
+{
+  if (bucket->key)
+    free(bucket->key);
+  if (bucket->map)
+    map_free(bucket->map);
+  free(bucket);
+}
+
 map_T* init_map(unsigned int size)
 {
   map_T* map = calloc(1, sizeof(struct MAP));
@@ -35,6 +55,43 @@ map_T* init_map(unsigned int size)
   map->used = 0;
   map_resize(map, map->len);
   return map;
+}
+
+void map_free(map_T* map)
+{
+  char** keys = 0;
+  unsigned int len;
+
+  if (map->keys) {
+    map_get_keys(map, &keys, &len);
+
+    for (unsigned int i = 0; i < len; i++) {
+      char* k = keys[i];
+      if (!k)
+        continue;
+
+      free(k);
+    }
+
+    free(map->keys);
+  }
+
+  if (map->used_buckets) {
+    for (unsigned int i = 0; i < map->len_used_buckets; i++) {
+      map_bucket_T* bucket = map->used_buckets[i];
+      if (!bucket)
+        continue;
+      map_bucket_free(bucket);
+    }
+
+    free(map->used_buckets);
+  }
+
+  if (map->buckets) {
+    free(map->buckets);
+  }
+
+  free(map);
 }
 
 unsigned int long map_get_index(map_T* map, char* key)
@@ -139,6 +196,10 @@ unsigned int long map_set(map_T* map, char* key, void* value)
     map->nrkeys += 1;
     map->keys = maybe_realloc(&map->keys, map->nrkeys);
     map->keys[map->nrkeys - 1] = strdup(key);
+
+    map->len_used_buckets += 1;
+    map->used_buckets = maybe_realloc_buckets(&map->used_buckets, map->len_used_buckets);
+    map->used_buckets[map->len_used_buckets - 1] = map->buckets[index];
     return index;
   }
 

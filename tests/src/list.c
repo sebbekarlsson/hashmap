@@ -26,6 +26,9 @@ list_T* init_list(size_t item_size)
 
 void list_push(list_T* list, void* item)
 {
+  if (!list) return;
+  if (!item) return;
+
   list->size += 1;
 
   if (!list->items)
@@ -41,7 +44,7 @@ void list_push_at(list_T* list, void* item, void* ptr)
   if (!list || !item)
     return;
 
-  if (ptr && !ptr_in_list(list, ptr))
+  if (ptr && item && !ptr_in_list(list, ptr))
     return list_prefix(list, item);
 
   list->size += 1;

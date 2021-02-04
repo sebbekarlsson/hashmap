@@ -7,7 +7,6 @@ typedef struct MAP_BUCKET
 {
   char* key;
   void* value;
-  struct MAP_BUCKET* next;
   struct MAP* map;
   struct MAP* source_map;
 } map_bucket_T;
@@ -15,6 +14,8 @@ typedef struct MAP_BUCKET
 typedef struct MAP
 {
   map_bucket_T** buckets;
+  map_bucket_T** used_buckets;
+  unsigned int len_used_buckets;
   unsigned int len;
   unsigned int used;
   unsigned int initial_size;
@@ -26,7 +27,11 @@ typedef struct MAP
 
 map_bucket_T* init_map_bucket(map_T* source_map, char* key, void* value, unsigned int size);
 
+void map_bucket_free(map_bucket_T* bucket);
+
 map_T* init_map(unsigned int size);
+
+void map_free(map_T* map);
 
 unsigned int long map_get_index(map_T* map, char* key);
 
