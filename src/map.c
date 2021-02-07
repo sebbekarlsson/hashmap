@@ -166,6 +166,9 @@ static void _map_resize(map_T* map, unsigned int inc)
 
 unsigned int long map_set(map_T* map, char* key, void* value)
 {
+  if (!key)
+    return 0;
+
   _map_resize(map, map->initial_size);
 
   unsigned int long index = map_get_index(map, key);
@@ -209,8 +212,7 @@ unsigned int long map_set(map_T* map, char* key, void* value)
 map_bucket_T* map_get(map_T* map, char* key)
 {
   if (!key) {
-    printf("map_get error, key is null.\n");
-    exit(1);
+    return 0;
   }
   unsigned int long index = map_get_index(map, key);
 
