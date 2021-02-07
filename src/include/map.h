@@ -51,6 +51,8 @@ void map_unset(map_T* map, char* key);
 
 void map_get_keys(map_T* map, char*** keys, unsigned int* size);
 
+map_T* map_copy(map_T* map);
+
 #define NEW_MAP() init_map(BIG_PRIME)
 
 #endif

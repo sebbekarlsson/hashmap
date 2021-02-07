@@ -263,6 +263,35 @@ map_bucket_T* map_find(map_T* map, char* key)
   return 0;
 }
 
+map_T* map_copy(map_T* map)
+{
+  if (!map->len)
+    return map;
+
+  map_T* new_map = calloc(1, sizeof(struct MAP));
+  new_map->used = map->used;
+  new_map->len = map->len;
+  new_map->initial_size = map->initial_size;
+  new_map->nrkeys = map->nrkeys;
+  new_map->keys = calloc(map->nrkeys, sizeof(char*));
+  memcpy(&new_map->keys, &map->keys, sizeof(map->keys));
+  new_map->used_buckets = map->used_buckets;
+
+  map_bucket_T** buckets = calloc(map->len, sizeof(map_bucket_T*));
+
+  if (buckets && map->buckets) {
+    for (unsigned int i = 0; i < map->len; i++) {
+      map_bucket_T* b = map->buckets[i];
+      buckets[i] = b;
+    }
+    // memcpy(buckets, &map->buckets, sizeof(map->buckets));
+  }
+
+  new_map->buckets = buckets;
+
+  return new_map;
+}
+
 void map_get_keys(map_T* map, char*** keys, unsigned int* size)
 {
   *keys = map->keys;
