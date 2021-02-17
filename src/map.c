@@ -166,8 +166,10 @@ static void _map_resize(map_T* map, unsigned int inc)
 
 unsigned int long map_set(map_T* map, char* key, void* value)
 {
-  if (!key)
-    return 0;
+  if (!key) {
+    exit(1);
+    printf("map_set: key cannot be null.\n");
+  }
 
   _map_resize(map, map->initial_size);
 
