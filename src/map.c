@@ -280,6 +280,7 @@ map_T* map_copy(map_T* map)
   new_map->keys = calloc(map->nrkeys, sizeof(char*));
   memcpy(&new_map->keys, &map->keys, sizeof(map->keys));
   new_map->used_buckets = map->used_buckets;
+  new_map->len_used_buckets = map->len_used_buckets;
 
   map_bucket_T** buckets = calloc(map->len, sizeof(map_bucket_T*));
 
