@@ -8,22 +8,14 @@
 
 char** maybe_realloc(char*** keys, unsigned int extra_size)
 {
-  if (!*keys) {
-    *keys = calloc(extra_size, sizeof(char*));
-  } else {
-    *keys = realloc(*keys, extra_size * sizeof(char*));
-  }
+  *keys = realloc(*keys, extra_size * sizeof(char*));
 
   return *keys;
 }
 
 map_bucket_T** maybe_realloc_buckets(map_bucket_T*** buckets, unsigned int extra_size)
 {
-  if (!*buckets) {
-    *buckets = calloc(extra_size, sizeof(char*));
-  } else {
-    *buckets = realloc(*buckets, extra_size * sizeof(char*));
-  }
+  *buckets = realloc(*buckets, extra_size * sizeof(char*));
 
   return *buckets;
 }
@@ -289,7 +281,6 @@ map_T* map_copy(map_T* map)
       map_bucket_T* b = map->buckets[i];
       buckets[i] = b;
     }
-    // memcpy(buckets, &map->buckets, sizeof(map->buckets));
   }
 
   new_map->buckets = buckets;
