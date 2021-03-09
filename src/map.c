@@ -93,6 +93,11 @@ unsigned int long map_get_index(map_T* map, char* key)
     exit(1);
   }
 
+  if (!map) {
+    printf("map_get_index error, map is null.\n");
+    exit(1);
+  }
+
   unsigned int long hash = map_hashfunc(map, key);
   unsigned int long index = hash % map->len;
 
@@ -104,6 +109,10 @@ unsigned int long map_get_index(map_T* map, char* key)
  */
 unsigned int long map_hashfunc(map_T* map, char* key)
 {
+  if (!map) {
+    printf("map_hashfunc error, map is null.\n");
+    exit(1);
+  }
   if (!key) {
     printf("map_hashfunc error, key is null.\n");
     exit(1);
@@ -205,9 +214,15 @@ unsigned int long map_set(map_T* map, char* key, void* value)
 
 map_bucket_T* map_get(map_T* map, char* key)
 {
-  if (!key) {
-    return 0;
+  if (!map) {
+    printf("map_get error, map is null.\n");
+    exit(1);
   }
+  if (!key) {
+    printf("map_get error, key is null.\n");
+    exit(1);
+  }
+
   unsigned int long index = map_get_index(map, key);
 
   map_bucket_T* bucket = map->buckets[index];
