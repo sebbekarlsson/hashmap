@@ -8,7 +8,7 @@ file(GLOB sources ${CMAKE_CURRENT_SOURCE_DIR}/src/*.c)
 
 add_library(hashmap SHARED ${sources})
 
-target_compile_options(hashmap PRIVATE -fPIC)
+target_compile_options(hashmap PUBLIC -fPIC)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
 
