@@ -1,5 +1,5 @@
-#ifndef MAP_H
-#define MAP_H
+#ifndef HASHMAP_MAP_H
+#define HASHMAP_MAP_H
 
 #define BIG_PRIME 503
 
