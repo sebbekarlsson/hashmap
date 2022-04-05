@@ -1,5 +1,5 @@
 #include "include/main.h"
-#include "../../src/include/map.h"
+#include <hashmap/map.h>
 #include "include/list.h"
 #include "include/test_with_structs.h"
 #include "include/utils.h"
@@ -2472,6 +2472,30 @@ void test_map_get_keys()
   PRINT_INFO();
 }
 
+void test_map_int()
+{
+     map_T* map = NEW_MAP();
+     map_set_int(map, "something", 1337);
+
+     int value = map_get_int(map, "something");
+
+     ASSERT(value == 1337, "assert int is correct");
+
+
+     map_set_int64(map, "hello", 100);
+     int64_t value2 = map_get_int64(map, "hello");
+
+     ASSERT(value2 == 100, "assert int64 is correct");
+
+     map_unset_factor(map, "hello");
+
+     int64_t value3 = map_get_int64(map, "hello");
+
+     ASSERT(value3 == 0, "assert factor was removed");
+
+  PRINT_INFO();
+}
+
 int main(int argc, char* argv[])
 {
   test_map_set();
@@ -2484,6 +2508,7 @@ int main(int argc, char* argv[])
   test_map_vs_loop();
   test_with_structs();
   test_map_get_keys();
+  test_map_int();
 
   return 0;
 }

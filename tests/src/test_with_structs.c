@@ -1,5 +1,5 @@
 #include "include/test_with_structs.h"
-#include "../../src/include/map.h"
+#include <hashmap/map.h>
 #include "include/list.h"
 #include "include/main.h"
 #include "include/utils.h"
