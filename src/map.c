@@ -184,6 +184,8 @@ unsigned int long map_set(map_T* map, char* key, void* value)
     map->errors += 1;
   }
 
+  map->item_count += 1;
+
   if (bucket && (strcmp(bucket->key, key) != 0)) {
     int i = map_set(bucket->map, key, value);
     map->collisions += 1;
@@ -296,6 +298,9 @@ void map_unset(map_T* map, char* key)
 
   int index = map_get_index(bucket->source_map, key);
   bucket->source_map->buckets[index] = 0;
+
+  map->item_count -=  1;
+  map->item_count = MAX(0, map->item_count);
 }
 
 void map_unset_factor(map_T* map, const char* key) {
@@ -408,4 +413,8 @@ int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint
 
   *out_length = count;
   return count > 0;
+}
+
+uint64_t map_get_count(map_T* map) {
+  return (uint64_t)MAX(0, map->item_count);
 }

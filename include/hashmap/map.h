@@ -24,6 +24,8 @@ typedef struct MAP
   unsigned int errors;
   char** keys;
   unsigned int nrkeys;
+
+  int64_t item_count;
 } map_T;
 
 typedef enum {
@@ -81,6 +83,8 @@ int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint
 map_T* map_copy(map_T* map);
 
 void map_copy_into(map_T* src, map_T* dest);
+
+uint64_t map_get_count(map_T* map);
 
 #define NEW_MAP() init_map(BIG_PRIME)
 
