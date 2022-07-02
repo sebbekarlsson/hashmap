@@ -65,6 +65,8 @@ map_bucket_T* map_get(map_T* map, char* key);
 
 void* map_get_value(map_T* map, char* key);
 
+void* map_get_value_nth(map_T* map, int64_t index);
+
 int map_get_int(map_T* map, const char* key);
 int64_t map_get_int64(map_T* map, const char* key);
 

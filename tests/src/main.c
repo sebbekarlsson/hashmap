@@ -28,6 +28,25 @@ void test_map_get()
   PRINT_INFO();
 }
 
+void test_map_get_nth()
+{
+  map_T* map = NEW_MAP();
+  map_set(map, "hello", strdup("world"));
+  map_set(map, "hello2", strdup("world2"));
+
+
+  char* value1 = (char*)map_get_value_nth(map, 0);
+  char* value2 = (char*)map_get_value_nth(map, 1);
+
+  ASSERT(strcmp(value1, "world") == 0, "value equals str");
+  ASSERT(strcmp(value2, "world2") == 0, "value equals str");
+
+
+  ASSERT(strcmp(value1, value2) != 0, "value not equals other");
+
+  PRINT_INFO();
+}
+
 void test_map_multiple()
 {
   const char* keys[] = { "contextually-based",
@@ -2509,6 +2528,7 @@ int main(int argc, char* argv[])
   test_with_structs();
   test_map_get_keys();
   test_map_int();
+  test_map_get_nth();
 
   return 0;
 }

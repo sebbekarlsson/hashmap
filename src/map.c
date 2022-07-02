@@ -418,3 +418,13 @@ int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint
 uint64_t map_get_count(map_T* map) {
   return (uint64_t)MAX(0, map->item_count);
 }
+
+void* map_get_value_nth(map_T* map, int64_t index) {
+  if (!map->buckets) return 0;
+  if (!map->keys) return 0;
+
+  index = index % map->nrkeys;
+
+
+  return map_get_value(map, map->keys[index]);
+}
