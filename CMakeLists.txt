@@ -12,6 +12,7 @@ add_library(hashmap_static STATIC ${sources})
 #add_executable(hashmap_e ${sources})
 
 target_compile_options(hashmap PUBLIC -fPIC)
+target_compile_options(hashmap_static PUBLIC -fPIC)
 #target_compile_options(hashmap_e PUBLIC -fPIC -g -Wall)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/src/include)
