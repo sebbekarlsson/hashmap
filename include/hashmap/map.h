@@ -26,6 +26,8 @@ typedef struct MAP
   unsigned int nrkeys;
 
   int64_t item_count;
+
+  unsigned int initialized;
 } map_T;
 
 typedef enum {
@@ -47,7 +49,13 @@ void map_bucket_free(map_bucket_T* bucket);
 
 map_T* init_map(unsigned int size);
 
+void  map_init(map_T* map, unsigned int size);
+
+typedef void (*HashmapFreeFunction)(void* ptr);
+
 void map_free(map_T* map);
+
+void map_clear(map_T* map, HashmapFreeFunction free_func);
 
 unsigned int long map_get_index(map_T* map, char* key);
 

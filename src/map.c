@@ -1,5 +1,5 @@
-#include <hashmap/map.h>
 #include <hashmap/macros.h>
+#include <hashmap/map.h>
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -40,6 +40,17 @@ void map_bucket_free(map_bucket_T* bucket)
   free(bucket);
 }
 
+void map_bucket_clear(map_bucket_T* bucket, HashmapFreeFunction free_func)
+{
+  if (!bucket)
+    return;
+
+  if (bucket->map) {
+    map_clear(bucket->map, free_func);
+  }
+  map_bucket_free(bucket);
+}
+
 map_T* init_map(unsigned int size)
 {
   map_T* map = calloc(1, sizeof(struct MAP));
@@ -48,6 +59,17 @@ map_T* init_map(unsigned int size)
   map->used = 0;
   map_resize(map, map->len);
   return map;
+}
+
+void map_init(map_T* map, unsigned int size)
+{
+  if (map->initialized)
+    return;
+  map->initialized = 1;
+  map->len = size;
+  map->initial_size = map->len;
+  map->used = 0;
+  map_resize(map, map->len);
 }
 
 void map_free(map_T* map)
@@ -85,6 +107,58 @@ void map_free(map_T* map)
   }
 
   free(map);
+}
+
+void map_clear(map_T* map, HashmapFreeFunction free_func)
+{
+  char** keys = 0;
+  unsigned int len;
+
+  if (map->keys) {
+    map_get_keys(map, &keys, &len);
+
+    for (unsigned int i = 0; i < len; i++) {
+      char* k = keys[i];
+      if (!k) {
+        continue;
+      }
+
+      map_bucket_T* bucket = map_get(map, k);
+
+      if (bucket) {
+        if (bucket->value && free_func) {
+          free_func(bucket->value);
+          bucket->value = 0;
+        }
+
+        map_unset(map, k);
+        map_bucket_free(bucket);
+        free(k);
+      }
+    }
+
+    free(map->keys);
+    map->keys = 0;
+    map->nrkeys = 0;
+  }
+
+  if (map->buckets) {
+    free(map->buckets);
+    map->buckets = 0;
+  }
+
+  if (map->used_buckets) {
+    free(map->used_buckets);
+    map->used_buckets = 0;
+  }
+
+  map->len = 0;
+  map->len_used_buckets = 0;
+  map->item_count = 0;
+  map->collisions = 0;
+  map->errors = 0;
+
+  map->used = 0;
 }
 
 unsigned int long map_get_index(map_T* map, char* key)
@@ -143,8 +217,17 @@ void map_resize(map_T* map, unsigned int inc)
 
 static void _map_resize(map_T* map, unsigned int inc)
 {
-  if ((map->used > map->len)) {
+  if ((map->used > map->len) || map->buckets == 0) {
     unsigned int old_len = map->len;
+
+    if (!map->len) {
+      map->len = map->initial_size;
+    }
+
+    if (!map->len) {
+      fprintf(stderr, "_map_resize: len == 0.\n");
+      return;
+    }
 
     map_resize(map, inc);
 
@@ -174,6 +257,11 @@ unsigned int long map_set(map_T* map, char* key, void* value)
   }
 
   _map_resize(map, map->initial_size);
+
+  if (!map->buckets) {
+    fprintf(stderr, "map_set: No buckets!\n");
+    return 0;
+  }
 
   unsigned int long index = map_get_index(map, key);
 
@@ -215,9 +303,12 @@ unsigned int long map_set(map_T* map, char* key, void* value)
   return index;
 }
 
-unsigned int long map_set_int(map_T* map, const char* key, int value) {
-  if (!map) return 0;
-  if (!key) return 0;
+unsigned int long map_set_int(map_T* map, const char* key, int value)
+{
+  if (!map)
+    return 0;
+  if (!key)
+    return 0;
   MapFactor* factor = calloc(1, sizeof(MapFactor*));
   factor->type = MAP_FACTOR_INT;
   factor->as.int_value = value;
@@ -225,9 +316,12 @@ unsigned int long map_set_int(map_T* map, const char* key, int value) {
   return map_set(map, (char*)key, factor);
 }
 
-unsigned int long map_set_int64(map_T* map, const char* key, int64_t value) {
-  if (!map) return 0;
-  if (!key) return 0;
+unsigned int long map_set_int64(map_T* map, const char* key, int64_t value)
+{
+  if (!map)
+    return 0;
+  if (!key)
+    return 0;
   MapFactor* factor = calloc(1, sizeof(MapFactor*));
   factor->type = MAP_FACTOR_INT64;
   factor->as.int64_value = value;
@@ -245,6 +339,9 @@ map_bucket_T* map_get(map_T* map, char* key)
     printf("map_get error, key is null.\n");
     exit(1);
   }
+
+  if (!map->buckets)
+    return 0;
 
   unsigned int long index = map_get_index(map, key);
 
@@ -267,24 +364,32 @@ void* map_get_value(map_T* map, char* key)
   return bucket->value;
 }
 
-int map_get_int(map_T* map, const char* key) {
-  if (!map) return 0;
-  if (!key) return 0;
+int map_get_int(map_T* map, const char* key)
+{
+  if (!map)
+    return 0;
+  if (!key)
+    return 0;
   MapFactor* factor = (MapFactor*)map_get_value(map, (char*)key);
-  if (!factor) return 0;
+  if (!factor)
+    return 0;
 
   return factor->as.int_value;
 }
 
-int64_t map_get_int64(map_T* map, const char* key) {
-  if (!map) return 0;
-  if (!key) return 0;
+int64_t map_get_int64(map_T* map, const char* key)
+{
+  if (!map)
+    return 0;
+  if (!key)
+    return 0;
   MapFactor* factor = (MapFactor*)map_get_value(map, (char*)key);
-  if (!factor) return 0;
+  if (!factor)
+    return 0;
 
   switch (factor->type) {
-    case MAP_FACTOR_INT64: return (int64_t) factor->as.int64_value; break;
-    case MAP_FACTOR_INT: return (int64_t) factor->as.int_value; break;
+    case MAP_FACTOR_INT64: return (int64_t)factor->as.int64_value; break;
+    case MAP_FACTOR_INT: return (int64_t)factor->as.int_value; break;
   }
 
   return factor->as.int64_value;
@@ -299,15 +404,19 @@ void map_unset(map_T* map, char* key)
   int index = map_get_index(bucket->source_map, key);
   bucket->source_map->buckets[index] = 0;
 
-  map->item_count -=  1;
+  map->item_count -= 1;
   map->item_count = MAX(0, map->item_count);
 }
 
-void map_unset_factor(map_T* map, const char* key) {
-  if (!map) return;
-  if (!key) return;
+void map_unset_factor(map_T* map, const char* key)
+{
+  if (!map)
+    return;
+  if (!key)
+    return;
   MapFactor* factor = (MapFactor*)map_get_value(map, (char*)key);
-  if (!factor) return;
+  if (!factor)
+    return;
 
   free(factor);
   factor = 0;
@@ -315,7 +424,8 @@ void map_unset_factor(map_T* map, const char* key) {
   return map_unset(map, (char*)key);
 }
 
-void map_unset_int(map_T* map, const char* key) {
+void map_unset_int(map_T* map, const char* key)
+{
   return map_unset_factor(map, key);
 }
 
@@ -374,9 +484,12 @@ void map_get_keys(map_T* map, char*** keys, unsigned int* size)
   *size = map->nrkeys;
 }
 
-void map_copy_into(map_T* src, map_T* dest) {
-  if (!src) return;
-  if (!dest) return;
+void map_copy_into(map_T* src, map_T* dest)
+{
+  if (!src)
+    return;
+  if (!dest)
+    return;
 
   char** keys = 0;
   uint32_t len = 0;
@@ -385,27 +498,37 @@ void map_copy_into(map_T* src, map_T* dest) {
 
   for (uint32_t i = 0; i < len; i++) {
     char* key = keys[i];
-    if (!key) continue;
+    if (!key)
+      continue;
     void* value = map_get_value(src, key);
-    if (!value) continue;
+    if (!value)
+      continue;
 
     map_set(dest, key, value);
   }
 }
 
-int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint32_t* out_length, void** out) {
-  if (!map) return 0;
-  if (!out) return 0;
-  if (!keys) return 0;
-  if (length <= 0) return 0;
+int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint32_t* out_length,
+                           void** out)
+{
+  if (!map)
+    return 0;
+  if (!out)
+    return 0;
+  if (!keys)
+    return 0;
+  if (length <= 0)
+    return 0;
 
   uint32_t count = 0;
   for (uint32_t i = 0; i < length; i++) {
     const char* key = keys[i];
-    if (!key) continue;
+    if (!key)
+      continue;
 
     void* value = map_get_value(map, (char*)key);
-    if (!value) continue;
+    if (!value)
+      continue;
 
     out[count] = value;
     count++;
@@ -415,16 +538,19 @@ int map_get_values_by_keys(map_T* map, const char* keys[], uint32_t length, uint
   return count > 0;
 }
 
-uint64_t map_get_count(map_T* map) {
+uint64_t map_get_count(map_T* map)
+{
   return (uint64_t)MAX(0, map->item_count);
 }
 
-void* map_get_value_nth(map_T* map, int64_t index) {
-  if (!map->buckets) return 0;
-  if (!map->keys) return 0;
+void* map_get_value_nth(map_T* map, int64_t index)
+{
+  if (!map->buckets)
+    return 0;
+  if (!map->keys)
+    return 0;
 
   index = index % map->nrkeys;
-
 
   return map_get_value(map, map->keys[index]);
 }
