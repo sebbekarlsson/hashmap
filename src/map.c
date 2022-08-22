@@ -161,7 +161,7 @@ void map_clear(map_T* map, HashmapFreeFunction free_func)
   map->used = 0;
 }
 
-unsigned int long map_get_index(map_T* map, char* key)
+HashMapIndex map_get_index(map_T* map, char* key)
 {
   if (!key) {
     printf("map_get_index error, key is null.\n");
@@ -173,8 +173,8 @@ unsigned int long map_get_index(map_T* map, char* key)
     exit(1);
   }
 
-  unsigned int long hash = map_hashfunc(map, key);
-  unsigned int long index = hash % map->len;
+  HashMapIndex hash = map_hashfunc(map, key);
+  HashMapIndex index = hash % map->len;
 
   return index;
 }
@@ -182,7 +182,7 @@ unsigned int long map_get_index(map_T* map, char* key)
 /**
  * From: http://www.cse.yorku.ca/~oz/hash.html
  */
-unsigned int long map_hashfunc(map_T* map, char* key)
+HashMapIndex map_hashfunc(map_T* map, char* key)
 {
   if (!map) {
     printf("map_hashfunc error, map is null. (key=%s)\n", key);
@@ -194,8 +194,8 @@ unsigned int long map_hashfunc(map_T* map, char* key)
   }
 
   unsigned char* str = (unsigned char*)key;
-  unsigned int long hash = 0;
-  int c;
+  HashMapIndex hash = 0;
+  int c = 0;
 
   while ((c = *str++)) {
     hash = (c + (hash << 6) + (hash << 16) - hash);
@@ -249,7 +249,7 @@ static void _map_resize(map_T* map, unsigned int inc)
   }
 }
 
-unsigned int long map_set(map_T* map, char* key, void* value)
+HashMapIndex map_set(map_T* map, char* key, void* value)
 {
   if (!key) {
     exit(1);
@@ -263,19 +263,18 @@ unsigned int long map_set(map_T* map, char* key, void* value)
     return 0;
   }
 
-  unsigned int long index = map_get_index(map, key);
+  HashMapIndex index = map_get_index(map, key);
 
   map_bucket_T* bucket = map->buckets[index];
 
   if (!bucket) {
-    bucket = map_find(map, key);
+    bucket = map_get(map, key);//map_find(map, key);
     map->errors += 1;
   }
 
-  map->item_count += 1;
 
   if (bucket && (strcmp(bucket->key, key) != 0)) {
-    int i = map_set(bucket->map, key, value);
+    HashMapIndex i = map_set(bucket->map, key, value);
     map->collisions += 1;
 
     map->nrkeys += 1;
@@ -287,6 +286,8 @@ unsigned int long map_set(map_T* map, char* key, void* value)
     bucket->value = value;
     return index;
   } else if (!bucket && !map->buckets[index]) {
+    // then it's a completely new key
+
     map->buckets[index] = init_map_bucket(map, key, value, MAX(128, map->initial_size));
     map->used += 1;
 
@@ -297,13 +298,18 @@ unsigned int long map_set(map_T* map, char* key, void* value)
     map->len_used_buckets += 1;
     map->used_buckets = maybe_realloc_buckets(&map->used_buckets, map->len_used_buckets);
     map->used_buckets[map->len_used_buckets - 1] = map->buckets[index];
+
+    map->item_count += 1;
+
     return index;
+  } else {
+    fprintf(stderr, "(Hashmap): Should not get here.\n");
   }
 
   return index;
 }
 
-unsigned int long map_set_int(map_T* map, const char* key, int value)
+HashMapIndex map_set_int(map_T* map, const char* key, int value)
 {
   if (!map)
     return 0;
@@ -316,7 +322,7 @@ unsigned int long map_set_int(map_T* map, const char* key, int value)
   return map_set(map, (char*)key, factor);
 }
 
-unsigned int long map_set_int64(map_T* map, const char* key, int64_t value)
+HashMapIndex map_set_int64(map_T* map, const char* key, int64_t value)
 {
   if (!map)
     return 0;
@@ -343,11 +349,11 @@ map_bucket_T* map_get(map_T* map, char* key)
   if (!map->buckets)
     return 0;
 
-  unsigned int long index = map_get_index(map, key);
+  HashMapIndex index = map_get_index(map, key);
 
   map_bucket_T* bucket = map->buckets[index];
 
-  if (bucket && bucket->key != 0 && strcmp(bucket->key, key) != 0) {
+  if (bucket && bucket->key != 0 && strcmp(bucket->key, key) != 0 && bucket->map != 0) {
     bucket = map_get(bucket->map, key);
   }
 

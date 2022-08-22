@@ -4,6 +4,8 @@
 
 #define BIG_PRIME 503
 
+typedef uint64_t HashMapIndex;
+
 typedef struct MAP_BUCKET
 {
   char* key;
@@ -20,7 +22,7 @@ typedef struct MAP
   unsigned int len;
   unsigned int used;
   unsigned int initial_size;
-  unsigned int long collisions;
+  HashMapIndex collisions;
   unsigned int errors;
   char** keys;
   unsigned int nrkeys;
@@ -57,16 +59,16 @@ void map_free(map_T* map);
 
 void map_clear(map_T* map, HashmapFreeFunction free_func);
 
-unsigned int long map_get_index(map_T* map, char* key);
+HashMapIndex map_get_index(map_T* map, char* key);
 
-unsigned int long map_hashfunc(map_T* map, char* key);
+HashMapIndex map_hashfunc(map_T* map, char* key);
 
 void map_resize(map_T* map, unsigned int inc);
 
-unsigned int long map_set(map_T* map, char* key, void* value);
+HashMapIndex map_set(map_T* map, char* key, void* value);
 
-unsigned int long map_set_int(map_T* map, const char* key, int value);
-unsigned int long map_set_int64(map_T* map, const char* key, int64_t value);
+HashMapIndex map_set_int(map_T* map, const char* key, int value);
+HashMapIndex map_set_int64(map_T* map, const char* key, int64_t value);
 
 
 map_bucket_T* map_get(map_T* map, char* key);
