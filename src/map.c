@@ -199,7 +199,6 @@ HashMapIndex map_hashfunc(map_T* map, char* key)
 
   while ((c = *str++)) {
     hash = (c + (hash << 6) + (hash << 16) - hash);
-    if (c < 0 || c >= 130) break;
   }
 
   return hash;
